@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.castillojuan.synchrony.entity.Image;
 import com.castillojuan.synchrony.service.ImgurService;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -23,10 +24,10 @@ public class ImgurController {
 
     //upload imgur images 
     @PostMapping("/image")
-    public ResponseEntity<JsonNode> uploadImage(@RequestParam("file") MultipartFile image) {
+    public ResponseEntity<Image> uploadImage(@RequestParam("file") MultipartFile image) {
         try {
             byte[] imageData = image.getBytes();
-            JsonNode response = imgurService.uploadImage(imageData);
+            Image response = imgurService.uploadImage(imageData);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(500).build();

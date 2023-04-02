@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.castillojuan.synchrony.ImgurConfiguration;
+import com.castillojuan.synchrony.entity.Image;
+import com.castillojuan.synchrony.repository.ImageRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -21,12 +23,14 @@ public class ImgurService {
 
     @Autowired
     private ImgurConfiguration imgurConfig;
+    @Autowired
+    private ImageRepository imageRepository;
     
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     
     //upload image method
-    public JsonNode uploadImage(byte[] imageData) throws IOException {
+    public Image uploadImage(byte[] imageData) throws IOException {
         OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
@@ -42,9 +46,19 @@ public class ImgurService {
 
         try (Response response = client.newCall(request).execute()) {
         	String responseBody = response.body().string();
-            return objectMapper.readTree(responseBody);
+            JsonNode jsonResponse = objectMapper.readTree(responseBody);
+            String imageHash = jsonResponse.get("data").get("id").asText();
+            String imageLink = jsonResponse.get("data").get("link").asText();
+            
+            
+            //1L represents the userId. TODO: get the userId dynamically 
+            Image image = new Image(imageHash, imageLink, 1L);
+            return imageRepository.save(image);
         }
     }
+    
+    
+    
     
     //get account images
     public JsonNode getAllAccountImages() throws IOException {
@@ -61,6 +75,9 @@ public class ImgurService {
             return objectMapper.readTree(responseBody);
         }
     }
+    
+    
+    
     
     //delete image
     public JsonNode deleteImage(String imageHash) throws IOException {
