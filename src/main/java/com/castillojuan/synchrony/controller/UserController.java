@@ -31,10 +31,16 @@ public class UserController {
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
     
-    //get user
     @GetMapping("/{userId}")
-    public ResponseEntity<User> getUserById(@PathVariable Long userId) {
-        User user = userService.getUserById(userId);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+    public ResponseEntity<User> getUserWithImages(@PathVariable Long userId) {
+        User user = userService.getUserWithImages(userId);
+        return ResponseEntity.ok(user);
     }
+    
+//    //get user
+//    @GetMapping("/{userId}")
+//    public ResponseEntity<User> getUserById(@PathVariable Long userId) {
+//        User user = userService.getUserById(userId);
+//        return new ResponseEntity<>(user, HttpStatus.OK);
+//    }
 }

@@ -27,7 +27,7 @@ public class ImgurController {
 
     //upload imgur images 
     @PostMapping("/image")
-    public ResponseEntity<Image> uploadImage(@RequestParam("file") MultipartFile image) {
+    public ResponseEntity<Image> uploadImage(@RequestParam("image") MultipartFile image) {
         try {
             byte[] imageData = image.getBytes();
             Image response = imgurService.uploadImage(imageData);

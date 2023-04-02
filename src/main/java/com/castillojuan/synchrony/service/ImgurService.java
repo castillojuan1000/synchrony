@@ -1,15 +1,21 @@
 package com.castillojuan.synchrony.service;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.castillojuan.synchrony.ImgurConfiguration;
 import com.castillojuan.synchrony.entity.Image;
+import com.castillojuan.synchrony.entity.User;
 import com.castillojuan.synchrony.repository.ImageRepository;
+import com.castillojuan.synchrony.repository.UserRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -19,12 +25,15 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 @Service
-public class ImgurService {
+public class ImgurService implements Serializable{
 
     @Autowired
     private ImgurConfiguration imgurConfig;
     @Autowired
     private ImageRepository imageRepository;
+    @Autowired
+    private UserRepository userRepository;
+    
     
     private final ObjectMapper objectMapper = new ObjectMapper();
     
@@ -51,9 +60,14 @@ public class ImgurService {
             String imageLink = jsonResponse.get("data").get("link").asText();
             
             
-            //1L represents the userId. TODO: get the userId dynamically 
-            Image image = new Image(imageHash, imageLink, 1L);
-            return imageRepository.save(image);
+     
+            //TODO:get the user_id dynamically
+            	
+            		User user = userRepository.findById((long) 1).orElseThrow(() -> new NoSuchElementException("User not found"));
+               	 	Image image = new Image(imageHash, imageLink, user);
+                    return imageRepository.save(image);
+                    
+				
         }
     }
     

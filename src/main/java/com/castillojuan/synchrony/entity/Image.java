@@ -1,6 +1,8 @@
 package com.castillojuan.synchrony.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -17,16 +19,18 @@ public class Image {
     @Column(name = "image_link")
     private String imageLink;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     public Image() {
     }
 
-    public Image(String imageHash, String imageLink, Long userId) {
+    public Image(String imageHash, String imageLink, User user) {
         this.imageHash = imageHash;
         this.imageLink = imageLink;
-        this.userId = userId;
+        this.user = user;
     }
 
     // Getters and setters for all fields
@@ -55,17 +59,19 @@ public class Image {
         this.imageLink = imageLink;
     }
 
-    public Long getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
 	@Override
 	public String toString() {
-		return "Image [id=" + id + ", imageHash=" + imageHash + ", imageLink=" + imageLink + ", userId=" + userId + "]";
+		return "Image [id=" + id + ", imageHash=" + imageHash + ", imageLink=" + imageLink + ", user=" + user + "]";
 	}
+
+	
     
 }
