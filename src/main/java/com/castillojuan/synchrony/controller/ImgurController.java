@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.castillojuan.synchrony.entity.Image;
 import com.castillojuan.synchrony.service.ImgurService;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/imgur")
@@ -21,6 +22,8 @@ public class ImgurController {
 
     @Autowired
     private ImgurService imgurService;
+    
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     //upload imgur images 
     @PostMapping("/image")
@@ -49,10 +52,11 @@ public class ImgurController {
     @DeleteMapping("/image/{imageHash}")
     public ResponseEntity<JsonNode> deleteImage(@PathVariable String imageHash) {
         try {
-            JsonNode response = imgurService.deleteImage(imageHash);
+            imgurService.deleteImage(imageHash);
+            JsonNode response = objectMapper.createObjectNode().put("message", "Image with imageHash " + imageHash + " has been deleted.");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(500).build();
+        	return ResponseEntity.status(500).build();
         }
     }
 }

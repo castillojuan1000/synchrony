@@ -80,8 +80,9 @@ public class ImgurService {
     
     
     //delete image
-    public JsonNode deleteImage(String imageHash) throws IOException {
-    	//todo: check if the image exists
+    public void deleteImage(String imageHash) throws IOException {
+    	
+    	 Image image = imageRepository.findByImageHash(imageHash);
     	
         OkHttpClient client = new OkHttpClient();
 
@@ -93,7 +94,13 @@ public class ImgurService {
 
         try (Response response = client.newCall(request).execute()) {
         	String responseBody = response.body().string();
-            return objectMapper.readTree(responseBody);
+            objectMapper.readTree(responseBody);
+            
+            if(image != null) {
+            	 imageRepository.delete(image);
+            }else {
+            	throw new IllegalStateException("Image not found with imageHash: " + imageHash);
+            }
         }
     }
     
