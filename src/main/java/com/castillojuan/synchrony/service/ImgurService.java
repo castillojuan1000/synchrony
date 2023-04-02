@@ -19,7 +19,9 @@ public class ImgurService {
 
     @Autowired
     private ImgurConfiguration imgurConfig;
-
+    
+    
+    //upload image method
     public String uploadImage(byte[] imageData) throws IOException {
         OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = new MultipartBody.Builder()
@@ -38,4 +40,20 @@ public class ImgurService {
             return response.body().string();
         }
     }
+    
+    //get account images
+    public String getAllAccountImages() throws IOException {
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url(imgurConfig.apiUrl + "/account/" + "castillojuan1000" + "/images")
+                .addHeader("Authorization", "Bearer 5edaed792b4f552fb9f4b03356a3e7ef8c3d7337")
+                .get()
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            return response.body().string();
+        }
+    }
+    
 }
