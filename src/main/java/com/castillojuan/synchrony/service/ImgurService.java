@@ -80,39 +80,54 @@ public class ImgurService implements Serializable{
     	}else {
     		throw new UnauthorizedAccessException("Unauthorized access");
     	}
-    	
-    	
-    	
-    	
+  	
     }
     
     
     
     
     //delete image
-    public void deleteImage(String imageHash) throws IOException {
+    public void deleteImage(String authHeader,String imageHash) throws IOException {
     	
-    	
-    	 Image image = imageRepository.findByImageHash(imageHash);
-    	
-        OkHttpClient client = new OkHttpClient();
+    	//Authorization
+    	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
 
-        Request request = new Request.Builder()
-                .url(imgurConfig.apiUrl + "/image/" + imageHash)
-                .addHeader("Authorization", "Bearer 5edaed792b4f552fb9f4b03356a3e7ef8c3d7337")
-                .delete()
-                .build();
 
-        try (Response response = client.newCall(request).execute()) {
-        	String responseBody = response.body().string();
-            objectMapper.readTree(responseBody);
-            
-            if(image != null) {
-            	 imageRepository.delete(image);
-            }else {
-            	throw new IllegalStateException("Image not found with imageHash: " + imageHash);
-            }
-        }
+    	if(token != null && !authHeader.isBlank()) {
+    		
+    		String userName =  DecryptToken.decryptToken(token);
+    		Optional<User> optionalUser = Optional.ofNullable(userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found")));
+    		
+    		if(optionalUser.isPresent()) {
+    			
+    			Image image = imageRepository.findByImageHash(imageHash);
+    	    	
+    	        OkHttpClient client = new OkHttpClient();
+    	        Request request = new Request.Builder()
+    	                .url(imgurConfig.apiUrl + "/image/" + imageHash)
+    	                .addHeader("Authorization", "Bearer 5edaed792b4f552fb9f4b03356a3e7ef8c3d7337")
+    	                .delete()
+    	                .build();
+
+    	        try (Response response = client.newCall(request).execute()) {
+    	        	String responseBody = response.body().string();
+    	            objectMapper.readTree(responseBody);
+    	            
+    	            if(image != null) {
+    	            	 imageRepository.delete(image);
+    	            }else {
+    	            	throw new IllegalStateException("Image not found with imageHash: " + imageHash);
+    	            }
+    	        }
+    	        
+    		}else {
+    			throw new NoSuchElementException("User not found");
+    		}
+    	}else {
+    		throw new UnauthorizedAccessException("Unauthorized access");
+    	}
+    	
+    	 
     }
     
 }
