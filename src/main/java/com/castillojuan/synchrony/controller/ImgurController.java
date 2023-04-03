@@ -71,8 +71,6 @@ public class ImgurController {
     	if(token != null && !authHeader.isBlank()) {
     		
     		String userName =  DecryptToken.decryptToken(token);
-//    		User user = userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found"));
-    		
     		Optional<User> optionalUser = Optional.ofNullable(userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found")));
     		
     		if(optionalUser.isPresent()) {
