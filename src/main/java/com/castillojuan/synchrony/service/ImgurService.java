@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import com.castillojuan.synchrony.ImgurConfiguration;
 import com.castillojuan.synchrony.entity.Image;
 import com.castillojuan.synchrony.entity.User;
+import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
 import com.castillojuan.synchrony.repository.ImageRepository;
 import com.castillojuan.synchrony.repository.UserRepository;
+import com.castillojuan.synchrony.utils.DecryptToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -39,52 +41,49 @@ public class ImgurService implements Serializable{
     
     
     //upload image method
-    public Image uploadImage(byte[] imageData, Long userId) throws IOException {
-        OkHttpClient client = new OkHttpClient();
-        RequestBody requestBody = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("image", "image.png",
-                        RequestBody.create(imageData, MediaType.parse("image/png")))
-                .build();
+    public Image uploadImage(byte[] imageData, String authHeader) throws IOException {
+    	//check authorization 
+    	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
+    	
+    	if(token != null && !authHeader.isBlank()) {
+    		String userName =  DecryptToken.decryptToken(token);
+    		User user = userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found"));
+    		
+    		//form and execute external endpoints (Imgur)
+            OkHttpClient client = new OkHttpClient();
+            RequestBody requestBody = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("image", "image.png",
+                            RequestBody.create(imageData, MediaType.parse("image/png")))
+                    .build();
 
-        Request request = new Request.Builder()
-                .url(imgurConfig.apiUrl + "/image")
-                .addHeader("Authorization", "Bearer 5edaed792b4f552fb9f4b03356a3e7ef8c3d7337")
-                .post(requestBody)
-                .build();
-
-        try (Response response = client.newCall(request).execute()) {
-        	String responseBody = response.body().string();
-            JsonNode jsonResponse = objectMapper.readTree(responseBody);
-            String imageHash = jsonResponse.get("data").get("id").asText();
-            String imageLink = jsonResponse.get("data").get("link").asText();   
-  
-            	
-		User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("User not found"));
-   	 	Image image = new Image(imageHash, imageLink, user);
-        return imageRepository.save(image);
-                    
-				
-        }
-    }
-    
-    
-    
-    
-    //get account images
-    public JsonNode getAllAccountImages() throws IOException {
-        OkHttpClient client = new OkHttpClient();
-
-        Request request = new Request.Builder()
-                .url(imgurConfig.apiUrl + "/account/" + "castillojuan1000" + "/images")
-                .addHeader("Authorization", "Bearer 5edaed792b4f552fb9f4b03356a3e7ef8c3d7337")
-                .get()
-                .build();
-
-        try (Response response = client.newCall(request).execute()) {
-        	String responseBody = response.body().string();
-            return objectMapper.readTree(responseBody);
-        }
+            Request request = new Request.Builder()
+                    .url(imgurConfig.apiUrl + "/image")
+                    .addHeader("Authorization", "Bearer 5edaed792b4f552fb9f4b03356a3e7ef8c3d7337")
+                    .post(requestBody)
+                    .build();
+            
+            //post image to Imgur user account and in memory database
+            try (Response response = client.newCall(request).execute()) {
+            	String responseBody = response.body().string();
+                JsonNode jsonResponse = objectMapper.readTree(responseBody);
+                String imageHash = jsonResponse.get("data").get("id").asText();
+                String imageLink = jsonResponse.get("data").get("link").asText();   
+      
+                //post image to H2 	
+    	   	 	Image image = new Image(imageHash, imageLink, user);
+    	        return imageRepository.save(image);
+    	                    
+    				
+            }
+            
+    	}else {
+    		throw new UnauthorizedAccessException("Unauthorized access");
+    	}
+    	
+    	
+    	
+    	
     }
     
     
@@ -92,6 +91,7 @@ public class ImgurService implements Serializable{
     
     //delete image
     public void deleteImage(String imageHash) throws IOException {
+    	
     	
     	 Image image = imageRepository.findByImageHash(imageHash);
     	
