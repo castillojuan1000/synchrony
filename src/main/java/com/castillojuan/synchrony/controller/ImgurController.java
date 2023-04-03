@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.castillojuan.synchrony.entity.Image;
 import com.castillojuan.synchrony.entity.User;
+import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
 import com.castillojuan.synchrony.repository.UserRepository;
 import com.castillojuan.synchrony.service.ImgurService;
 import com.castillojuan.synchrony.utils.DecryptToken;
@@ -41,23 +42,16 @@ public class ImgurController {
     @PostMapping("/image")
     public ResponseEntity<?> uploadImage(@RequestHeader("Authorization") String authHeader,@RequestParam("image") MultipartFile image) {
     	
-    	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
-    	
-    	if(token != null && !authHeader.isBlank()) {
-    		String userName =  DecryptToken.decryptToken(token);
-    		User user = userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found"));
-    		
-    		try {
-                byte[] imageData = image.getBytes();
-                Image response = imgurService.uploadImage(imageData, user.getId());
-                return ResponseEntity.ok(response);
-            } catch (Exception e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
-    		
-    	}else {
-    		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
-    	}
+    	try {
+            byte[] imageData = image.getBytes();
+            Image response = imgurService.uploadImage(imageData,authHeader);
+            return ResponseEntity.ok(response);
+        }catch(UnauthorizedAccessException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     	
     }
     
