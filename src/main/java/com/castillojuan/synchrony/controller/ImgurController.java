@@ -1,6 +1,7 @@
 package com.castillojuan.synchrony.controller;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -42,7 +43,7 @@ public class ImgurController {
     	
     	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
     	
-    	if(token != null) {
+    	if(token != null && !authHeader.isBlank()) {
     		String userName =  DecryptToken.decryptToken(token);
     		User user = userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found"));
     		
@@ -60,26 +61,38 @@ public class ImgurController {
     	
     }
     
-    //get imgur images
-    @GetMapping("/account/images")
-    public ResponseEntity<JsonNode> getAllAccountImages() {
-        try {
-            JsonNode response = imgurService.getAllAccountImages();
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).build();
-        }
-    }
     
     //delete image
     @DeleteMapping("/image/{imageHash}")
-    public ResponseEntity<JsonNode> deleteImage(@PathVariable String imageHash) {
-        try {
-            imgurService.deleteImage(imageHash);
-            JsonNode response = objectMapper.createObjectNode().put("message", "Image with imageHash " + imageHash + " has been deleted.");
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-        	return ResponseEntity.status(500).build();
-        }
+    public ResponseEntity<?> deleteImage(@RequestHeader("Authorization") String authHeader, @PathVariable String imageHash) {
+    	
+    	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
+    	
+    	if(token != null && !authHeader.isBlank()) {
+    		
+    		String userName =  DecryptToken.decryptToken(token);
+//    		User user = userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found"));
+    		
+    		Optional<User> optionalUser = Optional.ofNullable(userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found")));
+    		
+    		if(optionalUser.isPresent()) {
+    			try {
+    	            imgurService.deleteImage(imageHash);
+    	            JsonNode response = objectMapper.createObjectNode().put("message", "Image with imageHash " + imageHash + " has been deleted.");
+    	            return ResponseEntity.ok(response);
+    	        } catch (Exception e) {
+    	        	return ResponseEntity.status(500).build();
+    	        }
+    		}else{
+    			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User not found.");
+    		}
+    		
+    		 
+    		
+    	}else {
+    		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
+    	}
+
+
     }
 }
