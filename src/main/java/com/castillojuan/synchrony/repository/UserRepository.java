@@ -9,6 +9,7 @@ import com.castillojuan.synchrony.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-	//find student by email
+	
 	Optional<User> findUserByEmail(String email);
+	Optional<User> findByUsernameAndPassword(String username, String password);
 }
