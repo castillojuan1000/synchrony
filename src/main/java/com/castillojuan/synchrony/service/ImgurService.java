@@ -87,7 +87,7 @@ public class ImgurService implements Serializable{
     
     
     //delete image
-    public void deleteImage(String authHeader,String imageHash) throws IOException {
+    public void deleteImage(String imageHash,String authHeader) throws IOException {
     	
     	//Authorization
     	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
