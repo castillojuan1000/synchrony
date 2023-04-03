@@ -39,7 +39,7 @@ public class ImgurService implements Serializable{
     
     
     //upload image method
-    public Image uploadImage(byte[] imageData) throws IOException {
+    public Image uploadImage(byte[] imageData, Long userId) throws IOException {
         OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
@@ -57,15 +57,12 @@ public class ImgurService implements Serializable{
         	String responseBody = response.body().string();
             JsonNode jsonResponse = objectMapper.readTree(responseBody);
             String imageHash = jsonResponse.get("data").get("id").asText();
-            String imageLink = jsonResponse.get("data").get("link").asText();
-            
-            
-     
-            //TODO:get the user_id dynamically
+            String imageLink = jsonResponse.get("data").get("link").asText();   
+  
             	
-            		User user = userRepository.findById((long) 1).orElseThrow(() -> new NoSuchElementException("User not found"));
-               	 	Image image = new Image(imageHash, imageLink, user);
-                    return imageRepository.save(image);
+		User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("User not found"));
+   	 	Image image = new Image(imageHash, imageLink, user);
+        return imageRepository.save(image);
                     
 				
         }
