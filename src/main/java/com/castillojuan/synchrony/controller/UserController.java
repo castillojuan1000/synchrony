@@ -28,14 +28,25 @@ public class UserController {
         this.userService = userService;
     }
 
-    //register user
+    /**
+     * The createUser controller method is an HTTP POST endpoint 
+     * that creates and saves a new User object in the system. 
+     * @param user
+     * @return
+     */
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
         User createdUser = userService.createUser(user);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
     
-    //get user with Images
+    /**
+     * The getUserWithImages controller method is an endpoint 
+     * that retrieves a User object along with its associated Image objects.
+     * @param authHeader
+     * @param userId
+     * @return
+     */
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserWithImages(@RequestHeader("Authorization") String authHeader, @PathVariable Long userId) {
         try {
