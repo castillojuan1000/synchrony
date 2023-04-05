@@ -27,13 +27,13 @@ Ensure you have the following software installed on your local machine:
 
 ### Installation
 
-1. Clone the repository:
+1. Clone the repository:  
 git clone https://github.com/yourusername/synchrony.git
 
-2. Navigate to the project directory:
+2. Navigate to the project directory:  
 cd synchrony
 
-3. Install dependencies and build the project:
+3. Install dependencies and build the project:  
 mvn clean install
 
 The application should now be running on http://localhost:8080.
@@ -44,12 +44,11 @@ Use any REST client like Postman or Curl to interact with the API endpoints.
 
 ## Endpoints
 
-1. Register a user: `POST /api/users/register`
-2. Authenticate a user: `POST /api/users/authenticate`
-3. Upload an image: `POST /api/images`
-4. View all images: `GET /api/images`
-5. Delete an image: `DELETE /api/images/{imageId}`
-6. View user profile: `GET /api/users/{userId}`
+1. Register a user: `POST /users`
+2. Authenticate a user: `POST /auth/login`
+3. Upload an image: `POST /imgur/image`
+5. Delete an image: `DELETE /imgur/images/{imageHash}`
+6. View user profile and Images: `GET /users/{userId}`
 
 ## Contributing
 
