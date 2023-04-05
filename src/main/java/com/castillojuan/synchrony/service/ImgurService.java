@@ -40,7 +40,14 @@ public class ImgurService implements Serializable{
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     
-    //upload image method
+   /**
+    * This service method is responsible for uploading an image to an external image hosting service (Imgur) 
+    * and storing its metadata in a local in-memory database.
+    * @param imageData
+    * @param authHeader
+    * @return
+    * @throws IOException
+    */
     public Image uploadImage(byte[] imageData, String authHeader) throws IOException {
     	//check authorization 
     	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
@@ -49,7 +56,7 @@ public class ImgurService implements Serializable{
     		String userName =  DecryptToken.decryptToken(token);
     		User user = userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found"));
     		
-    		//form and execute external endpoints (Imgur)
+    		//forming and executing external endpoint (Imgur)
             OkHttpClient client = new OkHttpClient();
             RequestBody requestBody = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
@@ -63,7 +70,7 @@ public class ImgurService implements Serializable{
                     .post(requestBody)
                     .build();
             
-            //post image to Imgur user account and in memory database
+            //post image to Imgur user account
             try (Response response = client.newCall(request).execute()) {
             	String responseBody = response.body().string();
                 JsonNode jsonResponse = objectMapper.readTree(responseBody);
@@ -86,7 +93,13 @@ public class ImgurService implements Serializable{
     
     
     
-    //delete image
+    /**
+     * This service method is responsible for deleting an image from an external image hosting service (Imgur) 
+     * and removing its metadata from a local in-memory database.
+     * @param imageHash
+     * @param authHeader
+     * @throws IOException
+     */
     public void deleteImage(String imageHash,String authHeader) throws IOException {
     	
     	//Authorization
@@ -101,7 +114,8 @@ public class ImgurService implements Serializable{
     		if(optionalUser.isPresent()) {
     			
     			Image image = imageRepository.findByImageHash(imageHash);
-    	    	
+    			
+    	    	//forming and executing Imgur endpoint
     	        OkHttpClient client = new OkHttpClient();
     	        Request request = new Request.Builder()
     	                .url(imgurConfig.apiUrl + "/image/" + imageHash)

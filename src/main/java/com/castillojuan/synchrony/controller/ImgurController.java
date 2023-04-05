@@ -17,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.castillojuan.synchrony.entity.Image;
 import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
-import com.castillojuan.synchrony.repository.UserRepository;
 import com.castillojuan.synchrony.service.ImgurService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,12 +27,16 @@ public class ImgurController {
 
     @Autowired
     private ImgurService imgurService;
-    @Autowired
-    private UserRepository userRepository;
     
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    //upload imgur images 
+    /**
+     * The uploadImage controller method is an endpoint 
+     * that handles image uploading for authenticated users. 
+     * @param authHeader
+     * @param image
+     * @return
+     */
     @PostMapping("/image")
     public ResponseEntity<?> uploadImage(@RequestHeader("Authorization") String authHeader,@RequestParam("image") MultipartFile image) {
     	
@@ -51,7 +54,13 @@ public class ImgurController {
     }
     
     
-    //delete image
+    /**
+     * The deleteImage controller method is an endpoint 
+     * that handles the deletion of an image for authenticated users.
+     * @param authHeader
+     * @param imageHash
+     * @return
+     */
     @DeleteMapping("/image/{imageHash}")
     public ResponseEntity<?> deleteImage(@RequestHeader("Authorization") String authHeader, @PathVariable String imageHash) {
     	

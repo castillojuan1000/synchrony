@@ -6,14 +6,11 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.castillojuan.synchrony.entity.Image;
 import com.castillojuan.synchrony.entity.User;
 import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
-import com.castillojuan.synchrony.exception.UserNotFoundException;
 import com.castillojuan.synchrony.repository.ImageRepository;
 import com.castillojuan.synchrony.repository.UserRepository;
 import com.castillojuan.synchrony.utils.DecryptToken;
@@ -30,9 +27,13 @@ public class UserService {
         this.imageRepository = imageRepository;
     }
 
-    
+    /**
+     * The createUser method is a service method that creates and saves a new User object in the database. 
+     * It takes a User object as a parameter.
+     * @param user
+     * @return
+     */
     public User createUser(User user) {
-        //todo:  add password encryption and confirm password and validate email
     	
     	Optional<User> userByEmailOptional = userRepository.findUserByEmail(user.getEmail());
     	if(userByEmailOptional.isPresent()) {
@@ -43,7 +44,13 @@ public class UserService {
         return userRepository.save(user);
     }
     
-    
+    /**
+     * getUserWithImages, is a service method that retrieves a User object along with its associated Image objects. 
+     * The method takes two parameters as input: a String authHeader and a Long userId.
+     * @param authHeader
+     * @param userId
+     * @return
+     */
     public User getUserWithImages(String authHeader, Long userId) {
     	//check authorization 
     	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
