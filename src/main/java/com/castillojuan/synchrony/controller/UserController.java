@@ -17,10 +17,14 @@ import com.castillojuan.synchrony.entity.User;
 import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
 import com.castillojuan.synchrony.service.UserService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
-
+	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+	
     private final UserService userService;
 
     @Autowired
@@ -36,8 +40,12 @@ public class UserController {
      */
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
+    	logger.info("Create User entry point.");
         User createdUser = userService.createUser(user);
+        
+        logger.info("Create User finished.");
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        
     }
     
     /**
@@ -49,8 +57,10 @@ public class UserController {
      */
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserWithImages(@RequestHeader("Authorization") String authHeader, @PathVariable Long userId) {
+    	logger.info("Get User with Images entry point.");
         try {
         	User user = userService.getUserWithImages(authHeader, userId);
+        	logger.info("Get User with Images finished.");
             return ResponseEntity.ok(user);
         }catch(NoSuchElementException e) {
         	return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User not found.");
