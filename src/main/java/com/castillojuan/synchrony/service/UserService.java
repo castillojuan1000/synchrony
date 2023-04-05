@@ -55,23 +55,25 @@ public class UserService {
     	//check authorization 
     	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
     	
-    	if(token != null && !authHeader.isBlank()) {
-    		//check if user exists
-    		String userName =  DecryptToken.decryptToken(token);
-    		Optional<User> optionalUser = Optional.ofNullable(userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found")));
-    		
-    		if(optionalUser.isPresent()) {
-    			User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("User not found"));
-    	        List<Image> images = imageRepository.findByUserId(userId);
-    	        user.setImages(images);
-    	        return user;
-    		}else {
-    			throw new NoSuchElementException("User not found");
-    		}
-    		
-    	}else {
+    	if(token == null || authHeader.isBlank()) {
     		throw new UnauthorizedAccessException("Unauthorized access");
-    	}	
+    	}
+    	
+
+		//check if user exists and get user info 
+		String userName =  DecryptToken.decryptToken(token);
+		Optional<User> optionalUser = Optional.ofNullable(userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found")));
+		
+		if(optionalUser.isPresent()) {
+			User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("User not found"));
+	        List<Image> images = imageRepository.findByUserId(userId);
+	        user.setImages(images);
+	        return user;
+		}else {
+			throw new NoSuchElementException("User not found");
+		}
+		
+	
     	
     }
     
