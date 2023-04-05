@@ -52,41 +52,43 @@ public class ImgurService implements Serializable{
     	//check authorization 
     	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
     	
-    	if(token != null && !authHeader.isBlank()) {
-    		String userName =  DecryptToken.decryptToken(token);
-    		User user = userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found"));
-    		
-    		//forming and executing external endpoint (Imgur)
-            OkHttpClient client = new OkHttpClient();
-            RequestBody requestBody = new MultipartBody.Builder()
-                    .setType(MultipartBody.FORM)
-                    .addFormDataPart("image", "image.png",
-                            RequestBody.create(imageData, MediaType.parse("image/png")))
-                    .build();
-
-            Request request = new Request.Builder()
-                    .url(imgurConfig.apiUrl + "/image")
-                    .addHeader("Authorization", "Bearer 5edaed792b4f552fb9f4b03356a3e7ef8c3d7337")
-                    .post(requestBody)
-                    .build();
-            
-            //post image to Imgur user account
-            try (Response response = client.newCall(request).execute()) {
-            	String responseBody = response.body().string();
-                JsonNode jsonResponse = objectMapper.readTree(responseBody);
-                String imageHash = jsonResponse.get("data").get("id").asText();
-                String imageLink = jsonResponse.get("data").get("link").asText();   
-      
-                //post image to H2 	
-    	   	 	Image image = new Image(imageHash, imageLink, user);
-    	        return imageRepository.save(image);
-    	                    
-    				
-            }
-            
-    	}else {
+    	if(token == null || authHeader.isBlank()) {
     		throw new UnauthorizedAccessException("Unauthorized access");
     	}
+    	
+
+		String userName =  DecryptToken.decryptToken(token);
+		User user = userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found"));
+		
+		//forming and executing external endpoint (Imgur)
+        OkHttpClient client = new OkHttpClient();
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("image", "image.png",
+                        RequestBody.create(imageData, MediaType.parse("image/png")))
+                .build();
+
+        Request request = new Request.Builder()
+                .url(imgurConfig.apiUrl + "/image")
+                .addHeader("Authorization", "Bearer 5edaed792b4f552fb9f4b03356a3e7ef8c3d7337")
+                .post(requestBody)
+                .build();
+        
+        //post image to Imgur user account
+        try (Response response = client.newCall(request).execute()) {
+        	String responseBody = response.body().string();
+            JsonNode jsonResponse = objectMapper.readTree(responseBody);
+            String imageHash = jsonResponse.get("data").get("id").asText();
+            String imageLink = jsonResponse.get("data").get("link").asText();   
+  
+            //post image to H2 	
+	   	 	Image image = new Image(imageHash, imageLink, user);
+	        return imageRepository.save(image);
+	                    
+				
+        }
+        
+	
   	
     }
     
@@ -106,40 +108,42 @@ public class ImgurService implements Serializable{
     	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
 
 
-    	if(token != null && !authHeader.isBlank()) {
-    		
-    		String userName =  DecryptToken.decryptToken(token);
-    		Optional<User> optionalUser = Optional.ofNullable(userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found")));
-    		
-    		if(optionalUser.isPresent()) {
-    			
-    			Image image = imageRepository.findByImageHash(imageHash);
-    			
-    	    	//forming and executing Imgur endpoint
-    	        OkHttpClient client = new OkHttpClient();
-    	        Request request = new Request.Builder()
-    	                .url(imgurConfig.apiUrl + "/image/" + imageHash)
-    	                .addHeader("Authorization", "Bearer 5edaed792b4f552fb9f4b03356a3e7ef8c3d7337")
-    	                .delete()
-    	                .build();
-
-    	        try (Response response = client.newCall(request).execute()) {
-    	        	String responseBody = response.body().string();
-    	            objectMapper.readTree(responseBody);
-    	            
-    	            if(image != null) {
-    	            	 imageRepository.delete(image);
-    	            }else {
-    	            	throw new IllegalStateException("Image not found with imageHash: " + imageHash);
-    	            }
-    	        }
-    	        
-    		}else {
-    			throw new NoSuchElementException("User not found");
-    		}
-    	}else {
+    	if(token == null || authHeader.isBlank()) {
     		throw new UnauthorizedAccessException("Unauthorized access");
     	}
+    	
+
+		
+		String userName =  DecryptToken.decryptToken(token);
+		Optional<User> optionalUser = Optional.ofNullable(userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found")));
+		
+		if(optionalUser.isPresent()) {
+			
+			Image image = imageRepository.findByImageHash(imageHash);
+			
+	    	//forming and executing Imgur endpoint
+	        OkHttpClient client = new OkHttpClient();
+	        Request request = new Request.Builder()
+	                .url(imgurConfig.apiUrl + "/image/" + imageHash)
+	                .addHeader("Authorization", "Bearer 5edaed792b4f552fb9f4b03356a3e7ef8c3d7337")
+	                .delete()
+	                .build();
+
+	        try (Response response = client.newCall(request).execute()) {
+	        	String responseBody = response.body().string();
+	            objectMapper.readTree(responseBody);
+	            
+	            if(image != null) {
+	            	 imageRepository.delete(image);
+	            }else {
+	            	throw new IllegalStateException("Image not found with imageHash: " + imageHash);
+	            }
+	        }
+	        
+		}else {
+			throw new NoSuchElementException("User not found");
+		}
+	
     	
     	 
     }
