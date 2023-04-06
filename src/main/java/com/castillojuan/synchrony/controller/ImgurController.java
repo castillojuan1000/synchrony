@@ -21,13 +21,14 @@ import com.castillojuan.synchrony.service.ImgurService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.castillojuan.synchrony.utils.Logs;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/imgur")
 public class ImgurController {
-	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+//	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+	Logger logger = Logs.getLogger();
 
     @Autowired
     private ImgurService imgurService;
@@ -43,18 +44,19 @@ public class ImgurController {
      */
     @PostMapping("/image")
     public ResponseEntity<?> uploadImage(@RequestHeader("Authorization") String authHeader,@RequestParam("image") MultipartFile image) {
-    	logger.info("Upload Image entry point.");
+    	logger.info("Staring uploading image.");
     	
     	try {
             byte[] imageData = image.getBytes();
             Image response = imgurService.uploadImage(imageData,authHeader);
+            logger.info("Finished uploading image.");
             return ResponseEntity.ok(response);
         }catch(UnauthorizedAccessException e) {
-        	logger.error("Unauthorized Access");
+        	logger.warning("Unauthorized Access");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
 
         } catch (Exception e) {
-        	logger.error(e.getMessage());
+        	logger.warning(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     	
@@ -70,25 +72,26 @@ public class ImgurController {
      */
     @DeleteMapping("/image/{imageHash}")
     public ResponseEntity<?> deleteImage(@RequestHeader("Authorization") String authHeader, @PathVariable String imageHash) {
-    	logger.info("Delete Image entry point.");
+    	logger.info("Deleting Image");
     	try {
     		
             imgurService.deleteImage(imageHash, authHeader);
             JsonNode response = objectMapper.createObjectNode().put("message", "Image with imageHash " + imageHash + " has been deleted.");
+            logger.info("Finish deleting Image");
             return ResponseEntity.ok(response);
             
         }catch(UnauthorizedAccessException e) {
-        	logger.error("Unauthorized access.");
+        	logger.warning("Unauthorized access.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access.");
 
         }catch(NoSuchElementException e) {
-        	logger.error("User not found.");
+        	logger.warning("User not found.");
         	return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User not found.");
         }catch(IllegalStateException e) {
-        	logger.error("Image not found.");
+        	logger.warning("Image not found.");
         	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Image not found");
         } catch (Exception e) {
-        	logger.error(e.getMessage());
+        	logger.warning(e.getMessage());
         	return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 

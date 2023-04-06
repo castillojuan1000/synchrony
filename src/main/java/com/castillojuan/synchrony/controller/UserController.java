@@ -16,14 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.castillojuan.synchrony.entity.User;
 import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
 import com.castillojuan.synchrony.service.UserService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.castillojuan.synchrony.utils.Logs;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
-	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+//	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+	Logger logger = Logs.getLogger();
 	
     private final UserService userService;
 
@@ -40,10 +40,10 @@ public class UserController {
      */
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
-    	logger.info("Create User entry point.");
+    	logger.info("Creating user");
         User createdUser = userService.createUser(user);
         
-        logger.info("Create User finished.");
+        logger.info("Finished creating user");
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
         
     }
@@ -57,14 +57,16 @@ public class UserController {
      */
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserWithImages(@RequestHeader("Authorization") String authHeader, @PathVariable Long userId) {
-    	logger.info("Get User with Images entry point.");
+    	logger.info("Getting user info and images");
         try {
         	User user = userService.getUserWithImages(authHeader, userId);
-        	logger.info("Get User with Images finished.");
+        	logger.info("Finished getting user info and images");
             return ResponseEntity.ok(user);
         }catch(NoSuchElementException e) {
+        	logger.warning("User not found.");
         	return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User not found.");
         }catch(UnauthorizedAccessException e) {
+        	logger.warning("Unauthorized access.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
 
         }
