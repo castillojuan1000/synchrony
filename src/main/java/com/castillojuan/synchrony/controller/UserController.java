@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.castillojuan.synchrony.dto.UserDTO;
 import com.castillojuan.synchrony.entity.User;
 import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
 import com.castillojuan.synchrony.service.UserService;
 import com.castillojuan.synchrony.utils.Logs;
+import com.castillojuan.synchrony.utils.*;
 import java.util.logging.Logger;
 
 @RestController
@@ -39,12 +41,15 @@ public class UserController {
      * @return
      */
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<UserDTO> createUser(@RequestBody User user) {
     	logger.info("Creating user");
         User createdUser = userService.createUser(user);
         
+     // Convert the created user to a UserResponseDTO
+        UserDTO userDTO = Util.toUserResponseDTO(createdUser);
+        
         logger.info("Finished creating user");
-        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        return new ResponseEntity<>(userDTO, HttpStatus.CREATED);
         
     }
     

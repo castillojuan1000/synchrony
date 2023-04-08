@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.castillojuan.synchrony.controller.UserController;
@@ -25,11 +26,13 @@ public class UserService {
 
 	private final UserRepository userRepository;
     private final ImageRepository imageRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, ImageRepository imageRepository) {
+    public UserService(UserRepository userRepository, ImageRepository imageRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.imageRepository = imageRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -45,7 +48,12 @@ public class UserService {
     		throw new IllegalStateException("A user with the same email already exists");
     	}
 
-        // save the user to the database
+    	
+    	// Hash the user's password and set it on the user object
+    	String password = user.getPassword();
+        user.setPassword(passwordEncoder.encode(password));
+        
+     // save the user to the database
         return userRepository.save(user);
     }
     
