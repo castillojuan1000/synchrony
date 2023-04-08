@@ -11,13 +11,13 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.castillojuan.synchrony.ImgurConfiguration;
 import com.castillojuan.synchrony.controller.UserController;
 import com.castillojuan.synchrony.entity.Image;
 import com.castillojuan.synchrony.entity.User;
 import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
 import com.castillojuan.synchrony.repository.ImageRepository;
 import com.castillojuan.synchrony.repository.UserRepository;
+import com.castillojuan.synchrony.security.ImgurConfiguration;
 import com.castillojuan.synchrony.utils.DecryptToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -80,7 +80,7 @@ public class ImgurService implements Serializable{
 
         Request request = new Request.Builder()
                 .url(imgurConfig.apiUrl + "/image")
-                .addHeader("Authorization", "Bearer 5edaed792b4f552fb9f4b03356a3e7ef8c3d7337")
+                .addHeader("Authorization", "Bearer "+ imgurConfig.auth)
                 .post(requestBody)
                 .build();
         
@@ -136,7 +136,7 @@ public class ImgurService implements Serializable{
 	        OkHttpClient client = new OkHttpClient();
 	        Request request = new Request.Builder()
 	                .url(imgurConfig.apiUrl + "/image/" + imageHash)
-	                .addHeader("Authorization", "Bearer 5edaed792b4f552fb9f4b03356a3e7ef8c3d7337")
+	                .addHeader("Authorization", "Bearer "+ imgurConfig.auth)
 	                .delete()
 	                .build();
 

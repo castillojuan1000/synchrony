@@ -1,4 +1,4 @@
-package com.castillojuan.synchrony;
+package com.castillojuan.synchrony.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -13,4 +13,7 @@ public class ImgurConfiguration {
 
     @Value("${imgur.apiUrl}")
     public String apiUrl;
+    
+    @Value("${imgur.auth}")
+    public String auth;
 }
