@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 @Service
 public class UserService {
-	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+	
 
 	private final UserRepository userRepository;
     private final ImageRepository imageRepository;
@@ -42,7 +42,6 @@ public class UserService {
      * @return
      */
     public User createUser(User user) {
-    	logger.info("Create user started.");
     	Optional<User> userByEmailOptional = userRepository.findUserByEmail(user.getEmail());
     	if(userByEmailOptional.isPresent()) {
     		throw new IllegalStateException("A user with the same email already exists");
@@ -65,7 +64,6 @@ public class UserService {
      * @return
      */
     public User getUserWithImages(String authHeader, Long userId) {
-    	logger.info("Get User With Images Started.");
     	//check authorization 
     	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
     	
