@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 @RestController
 @RequestMapping("/auth")
 public class AuthenticationController {
-	Logger logger = Logs.getLogger();
 
 	private final AuthenticationService authenticationService;
 
@@ -33,17 +32,14 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody Auth auth) {
-    	logger.info("Authenticating user.");
     	String username = auth.getUsername();
         String password = auth.getPassword();
         
         Optional<User> user = authenticationService.authenticate(username, password);
         if (user.isPresent()) {
             String token = GenerateToken.generateToken(username);
-            logger.info("Finished authenticating user.");
             return ResponseEntity.ok(token);
         } else {
-        	logger.warning("Invalid username or password.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
     }

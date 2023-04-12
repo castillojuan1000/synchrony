@@ -33,8 +33,6 @@ import okhttp3.Response;
 @Service
 public class ImgurService implements Serializable{
 	
-	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-
 
     @Autowired
     private ImgurConfiguration imgurConfig;
@@ -56,13 +54,11 @@ public class ImgurService implements Serializable{
     * @throws IOException
     */
     public Image uploadImage(byte[] imageData, String authHeader) throws IOException {
-    	logger.info("Upload Image Started.");
-
+    	
     	//check authorization 
     	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
     	
     	if(token == null || authHeader.isBlank()) {
-    		logger.error("Unauthorized access.");
     		throw new UnauthorizedAccessException("Unauthorized access.");
     	}
     	
@@ -113,13 +109,11 @@ public class ImgurService implements Serializable{
      * @throws IOException
      */
     public void deleteImage(String imageHash,String authHeader) throws IOException {
-    	logger.info("Delete Image started.");
     	//Authorization
     	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
 
 
     	if(token == null || authHeader.isBlank()) {
-    		logger.error("Unauthorized access.");
     		throw new UnauthorizedAccessException("Unauthorized access");
     	}
     	
@@ -147,13 +141,11 @@ public class ImgurService implements Serializable{
 	            if(image != null) {
 	            	 imageRepository.delete(image);
 	            }else {
-	            	logger.error("Image not found with imageHash: " + imageHash);
 	            	throw new IllegalStateException("Image not found with imageHash: " + imageHash);
 	            }
 	        }
 	        
 		}else {
-			logger.error("User not found");
 			throw new NoSuchElementException("User not found");
 		}
 	

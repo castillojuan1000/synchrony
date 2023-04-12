@@ -24,8 +24,7 @@ import java.util.logging.Logger;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-//	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-	Logger logger = Logs.getLogger();
+
 	
     private final UserService userService;
 
@@ -42,13 +41,13 @@ public class UserController {
      */
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody User user) {
-    	logger.info("Creating user");
+    	
         User createdUser = userService.createUser(user);
         
      // Convert the created user to a UserResponseDTO
         UserDTO userDTO = Util.toUserResponseDTO(createdUser);
         
-        logger.info("Finished creating user");
+        
         return new ResponseEntity<>(userDTO, HttpStatus.CREATED);
         
     }
@@ -62,16 +61,16 @@ public class UserController {
      */
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserWithImages(@RequestHeader("Authorization") String authHeader, @PathVariable Long userId) {
-    	logger.info("Getting user info and images");
+    	
         try {
         	User user = userService.getUserWithImages(authHeader, userId);
-        	logger.info("Finished getting user info and images");
+        	
             return ResponseEntity.ok(user);
         }catch(NoSuchElementException e) {
-        	logger.warning("User not found.");
+        	
         	return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User not found.");
         }catch(UnauthorizedAccessException e) {
-        	logger.warning("Unauthorized access.");
+        	
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
 
         }
