@@ -12,10 +12,14 @@ import org.springframework.stereotype.Service;
 import com.castillojuan.synchrony.controller.UserController;
 import com.castillojuan.synchrony.entity.Image;
 import com.castillojuan.synchrony.entity.User;
+import com.castillojuan.synchrony.enums.Role;
 import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
 import com.castillojuan.synchrony.repository.ImageRepository;
 import com.castillojuan.synchrony.repository.UserRepository;
+import com.castillojuan.synchrony.security.AuthenticationResponse;
 import com.castillojuan.synchrony.utils.DecryptToken;
+
+import lombok.experimental.var;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +31,18 @@ public class UserService {
 	private final UserRepository userRepository;
     private final ImageRepository imageRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Autowired
-    public UserService(UserRepository userRepository, ImageRepository imageRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, 
+    		ImageRepository imageRepository, 
+    		PasswordEncoder passwordEncoder,
+    		JwtService jwtService) {
+    	
         this.userRepository = userRepository;
         this.imageRepository = imageRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     /**
@@ -41,19 +51,26 @@ public class UserService {
      * @param user
      * @return
      */
-    public User createUser(User user) {
+    public AuthenticationResponse createUser(User user) {
     	Optional<User> userByEmailOptional = userRepository.findUserByEmail(user.getEmail());
     	if(userByEmailOptional.isPresent()) {
     		throw new IllegalStateException("A user with the same email already exists");
     	}
-
-    	
-    	// Hash the user's password and set it on the user object
-    	String password = user.getPassword();
-        user.setPassword(passwordEncoder.encode(password));
         
+        User builtUser = User.builder()
+        				.firstName(user.getFirstName())
+        				.lastName(user.getLastName())
+        				.email(user.getEmail())
+        				.username(user.getUsername())
+        				.password(passwordEncoder.encode(user.getPassword()))
+        				.role(Role.USER)
+        				.build();
+        
+        userRepository.save(builtUser);
+        
+        String jwtToken = jwtService.generateToken(builtUser);
      // save the user to the database
-        return userRepository.save(user);
+        return AuthenticationResponse.builder().token(jwtToken).build();
     }
     
     /**

@@ -40,6 +40,8 @@ public class ImgurService implements Serializable{
     private ImageRepository imageRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JwtService jwtService;
     
     
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -63,7 +65,7 @@ public class ImgurService implements Serializable{
     	}
     	
 
-		String userName =  DecryptToken.decryptToken(token);
+		String userName =  jwtService.extractUsername(token);
 		User user = userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found"));
 		
 		//forming and executing external endpoint (Imgur)
@@ -119,7 +121,7 @@ public class ImgurService implements Serializable{
     	
 
 		
-		String userName =  DecryptToken.decryptToken(token);
+		String userName =  jwtService.extractUsername(token);
 		Optional<User> optionalUser = Optional.ofNullable(userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found")));
 		
 		if(optionalUser.isPresent()) {
