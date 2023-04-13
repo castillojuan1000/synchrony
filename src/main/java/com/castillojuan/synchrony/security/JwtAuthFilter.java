@@ -2,7 +2,6 @@ package com.castillojuan.synchrony.security;
 
 import java.io.IOException;
 
-import org.aspectj.weaver.NewConstructorTypeMunger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

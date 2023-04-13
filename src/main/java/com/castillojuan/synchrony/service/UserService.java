@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.castillojuan.synchrony.controller.UserController;
+import com.castillojuan.synchrony.dto.UserDTO;
 import com.castillojuan.synchrony.entity.Image;
 import com.castillojuan.synchrony.entity.User;
 import com.castillojuan.synchrony.enums.Role;
@@ -17,12 +17,7 @@ import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
 import com.castillojuan.synchrony.repository.ImageRepository;
 import com.castillojuan.synchrony.repository.UserRepository;
 import com.castillojuan.synchrony.security.AuthenticationResponse;
-import com.castillojuan.synchrony.utils.DecryptToken;
-
-import lombok.experimental.var;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.castillojuan.synchrony.utils.Util;
 
 @Service
 public class UserService {
@@ -80,7 +75,7 @@ public class UserService {
      * @param userId
      * @return
      */
-    public User getUserWithImages(String authHeader, Long userId) {
+    public UserDTO getUserWithImages(String authHeader, Long userId) {
     	//check authorization 
     	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
     	
@@ -90,14 +85,16 @@ public class UserService {
     	
 
 		//check if user exists and get user info 
-		String userName =  DecryptToken.decryptToken(token);
+		String userName =  jwtService.extractUsername(token);
 		Optional<User> optionalUser = Optional.ofNullable(userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found")));
 		
 		if(optionalUser.isPresent()) {
 			User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("User not found"));
 	        List<Image> images = imageRepository.findByUserId(userId);
 	        user.setImages(images);
-	        return user;
+	        
+	        UserDTO uerDto = Util.toUserResponseDTO(user);
+	        return uerDto;
 		}else {
 			throw new NoSuchElementException("User not found");
 		}

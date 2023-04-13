@@ -13,6 +13,7 @@ public class Util {
 	    dto.setLastName(user.getLastName());
 	    dto.setUsername(user.getUsername());
 	    dto.setEmail(user.getEmail());
+	    dto.setImages(user.getImages());
 	    
 	    // Set any other fields from the User entity to the UserResponseDTO
 	    return dto;
