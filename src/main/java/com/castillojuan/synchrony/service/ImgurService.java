@@ -1,27 +1,21 @@
 package com.castillojuan.synchrony.service;
 
 import java.io.IOException;
-
 import java.io.Serializable;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.castillojuan.synchrony.controller.UserController;
 import com.castillojuan.synchrony.entity.Image;
 import com.castillojuan.synchrony.entity.User;
 import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
 import com.castillojuan.synchrony.repository.ImageRepository;
 import com.castillojuan.synchrony.repository.UserRepository;
 import com.castillojuan.synchrony.security.ImgurConfiguration;
-import com.castillojuan.synchrony.utils.DecryptToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;

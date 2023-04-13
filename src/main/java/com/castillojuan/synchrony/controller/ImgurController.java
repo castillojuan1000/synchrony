@@ -14,15 +14,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import com.castillojuan.synchrony.entity.Image;
 import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
 import com.castillojuan.synchrony.service.ImgurService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import com.castillojuan.synchrony.utils.Logs;
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/imgur")

@@ -7,19 +7,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.castillojuan.synchrony.dto.UserDTO;
-import com.castillojuan.synchrony.entity.User;
 import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
 import com.castillojuan.synchrony.service.UserService;
-import com.castillojuan.synchrony.utils.Logs;
-import com.castillojuan.synchrony.utils.*;
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/users")
@@ -32,25 +26,6 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-
-    /**
-     * The createUser controller method is an HTTP POST endpoint 
-     * that creates and saves a new User object in the system. 
-     * @param user
-     * @return
-     */
-//    @PostMapping
-//    public ResponseEntity<UserDTO> createUser(@RequestBody User user) {
-//    	
-//        User createdUser = userService.createUser(user);
-//        
-//     // Convert the created user to a UserResponseDTO
-//        UserDTO userDTO = Util.toUserResponseDTO(createdUser);
-//        
-//        
-//        return new ResponseEntity<>(userDTO, HttpStatus.CREATED);
-//        
-//    }
     
     /**
      * The getUserWithImages controller method is an endpoint 
@@ -63,7 +38,7 @@ public class UserController {
     public ResponseEntity<?> getUserWithImages(@RequestHeader("Authorization") String authHeader, @PathVariable Long userId) {
     	
         try {
-        	User user = userService.getUserWithImages(authHeader, userId);
+        	UserDTO user = userService.getUserWithImages(authHeader, userId);
         	
             return ResponseEntity.ok(user);
         }catch(NoSuchElementException e) {

@@ -13,8 +13,6 @@ import com.castillojuan.synchrony.entity.User;
 import com.castillojuan.synchrony.repository.UserRepository;
 import com.castillojuan.synchrony.security.AuthenticationResponse;
 
-import lombok.experimental.var;
-
 @Service
 public class AuthenticationService {
 	
