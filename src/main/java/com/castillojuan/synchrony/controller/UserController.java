@@ -39,18 +39,18 @@ public class UserController {
      * @param user
      * @return
      */
-    @PostMapping
-    public ResponseEntity<UserDTO> createUser(@RequestBody User user) {
-    	
-        User createdUser = userService.createUser(user);
-        
-     // Convert the created user to a UserResponseDTO
-        UserDTO userDTO = Util.toUserResponseDTO(createdUser);
-        
-        
-        return new ResponseEntity<>(userDTO, HttpStatus.CREATED);
-        
-    }
+//    @PostMapping
+//    public ResponseEntity<UserDTO> createUser(@RequestBody User user) {
+//    	
+//        User createdUser = userService.createUser(user);
+//        
+//     // Convert the created user to a UserResponseDTO
+//        UserDTO userDTO = Util.toUserResponseDTO(createdUser);
+//        
+//        
+//        return new ResponseEntity<>(userDTO, HttpStatus.CREATED);
+//        
+//    }
     
     /**
      * The getUserWithImages controller method is an endpoint 

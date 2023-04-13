@@ -3,11 +3,17 @@ package com.castillojuan.synchrony.service;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.castillojuan.synchrony.entity.User;
 import com.castillojuan.synchrony.repository.UserRepository;
+import com.castillojuan.synchrony.security.AuthenticationResponse;
+
+import lombok.experimental.var;
 
 @Service
 public class AuthenticationService {
@@ -15,23 +21,29 @@ public class AuthenticationService {
 
  	private final UserRepository userRepository;
  	private final PasswordEncoder passwordEncoder;
+ 	private final AuthenticationManager authenticationManager;
+ 	private final JwtService jwtService;
 
  	@Autowired
-    public AuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthenticationService(
+    		UserRepository userRepository, 
+    		PasswordEncoder passwordEncoder,
+    		AuthenticationManager authenticationManager,
+    		JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
     }
 
-    public Optional<User> authenticate(String username, String password) {
-    	Optional<User> userOptional = userRepository.findByUsername(username);
+    public AuthenticationResponse authenticate(String username, String password) {
+    	authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+    	
+    	Optional<User> user = userRepository.findByUsername(username);
+		UserDetails userDetails = user.get();
+    	
+		String jwtToken = jwtService.generateToken(userDetails);
         
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if (passwordEncoder.matches(password, user.getPassword())) {
-                return Optional.of(user);
-            }
-        }
-        
-        return Optional.empty();
+        return AuthenticationResponse.builder().token(jwtToken).build();
     }
 }
