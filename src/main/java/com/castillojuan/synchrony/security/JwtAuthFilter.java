@@ -14,6 +14,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.castillojuan.synchrony.service.JwtService;
 
+import ch.qos.logback.core.subst.Token;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,34 +37,42 @@ public class JwtAuthFilter extends OncePerRequestFilter{
 		final String authHeader = request.getHeader("Authorization");
 		final String jwt; 
 		final String userName;
+		boolean invalidAuthHeader = false;
 		
-		if(authHeader == null || !authHeader.startsWith("Bearer ")) {
-			filterChain.doFilter(request, response);
-			return;
-		}
-		
-		jwt = authHeader.substring(7);
-		
-		userName = jwtService.extractUsername(jwt);
-		
-		if(userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-			UserDetails userDetails = this.userDetailsService.loadUserByUsername(userName);
+		if(authHeader == null || !authHeader.startsWith("Bearer ")) {	
+			invalidAuthHeader = true;
+		}else {
+			jwt = authHeader.substring(7);
 			
-			if(jwtService.isTokenValid(jwt, userDetails)) {
+			userName = jwtService.extractUsername(jwt);
+			
+			if(userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+				UserDetails userDetails = this.userDetailsService.loadUserByUsername(userName);
 				
-				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-						userDetails, null, userDetails.getAuthorities());
+				if(jwtService.isTokenValid(jwt, userDetails)) {
+					
+					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+							userDetails, null, userDetails.getAuthorities());
+					
+					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+					
+					SecurityContextHolder.getContext().setAuthentication(authToken);
+				}
 				
-				authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 				
-				SecurityContextHolder.getContext().setAuthentication(authToken);
+				
 			}
-			
-			
-			
 		}
 		
-		filterChain.doFilter(request, response);
+		
+		if(invalidAuthHeader) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+	        response.setContentType("application/json");
+	        response.getWriter().write("{\"message\": \"Invalid or missing Authorization header\", \"status\": \"400\"}");
+	       
+		}else {
+			filterChain.doFilter(request, response);
+		}
 		
 	}
 

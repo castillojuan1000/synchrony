@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.castillojuan.synchrony.entity.Image;
 import com.castillojuan.synchrony.entity.User;
 import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
+import com.castillojuan.synchrony.exception.UserNotFoundException;
 import com.castillojuan.synchrony.repository.ImageRepository;
 import com.castillojuan.synchrony.repository.UserRepository;
 import com.castillojuan.synchrony.security.ImgurConfiguration;
@@ -60,7 +61,7 @@ public class ImgurService implements Serializable{
     	
 
 		String userName =  jwtService.extractUsername(token);
-		User user = userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found"));
+		User user = userRepository.findByUsername(userName).orElseThrow(() -> new UserNotFoundException("User not found"));
 		
 		//forming and executing external endpoint (Imgur)
         OkHttpClient client = new OkHttpClient();
