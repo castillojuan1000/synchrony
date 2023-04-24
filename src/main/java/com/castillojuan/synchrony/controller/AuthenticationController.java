@@ -41,6 +41,8 @@ public class AuthenticationController {
         return ResponseEntity.ok(userService.createUser(user));
         
     }
+    
+
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody AuthResquest auth) {
