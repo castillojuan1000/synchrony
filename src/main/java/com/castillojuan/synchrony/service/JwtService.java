@@ -10,9 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.castillojuan.synchrony.exception.InvalidJwtException;
 import com.castillojuan.synchrony.security.SecurityConfig;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -72,12 +74,16 @@ public class JwtService {
 	}
 	
 	public Claims extractAllClaims(String token) {
-		return Jwts
-				.parserBuilder()
-				.setSigningKey(getSignInKey())
-				.build()
-				.parseClaimsJws(token)
-				.getBody();
+		try {
+	        return Jwts
+	                .parserBuilder()
+	                .setSigningKey(getSignInKey())
+	                .build()
+	                .parseClaimsJws(token)
+	                .getBody();
+	    } catch (JwtException e) {
+	        throw new InvalidJwtException("Invalid JWT token");
+	    }
 	}
 
 	private Key getSignInKey() {

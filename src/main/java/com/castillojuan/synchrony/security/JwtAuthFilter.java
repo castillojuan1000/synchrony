@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.castillojuan.synchrony.exception.InvalidJwtException;
 import com.castillojuan.synchrony.service.JwtService;
 
 import ch.qos.logback.core.subst.Token;
@@ -34,17 +35,33 @@ public class JwtAuthFilter extends OncePerRequestFilter{
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,@NonNull FilterChain filterChain)throws ServletException, IOException {
 		
+		boolean isLoginRequest = request.getRequestURI().contains("/login") && request.getRequestURI().endsWith("/login");
+		boolean isRegisterUser = request.getRequestURI().contains("/register") && request.getRequestURI().endsWith("/register");
 		final String authHeader = request.getHeader("Authorization");
 		final String jwt; 
-		final String userName;
-		boolean invalidAuthHeader = false;
+		String userName;
 		
-		if(authHeader == null || !authHeader.startsWith("Bearer ")) {	
+		boolean invalidAuthHeader = false;
+		boolean invalidJwt = false;
+		
+		if(isLoginRequest || isRegisterUser) {
+			filterChain.doFilter(request, response);
+	        return;
+	        
+		}else if(authHeader == null || !authHeader.startsWith("Bearer ")) {	
+			
 			invalidAuthHeader = true;
+			
 		}else {
+			
 			jwt = authHeader.substring(7);
 			
-			userName = jwtService.extractUsername(jwt);
+			try {
+		        userName = jwtService.extractUsername(jwt);
+		    } catch (InvalidJwtException e) {
+		        invalidJwt = true;
+		        userName = null;
+		    }
 			
 			if(userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 				UserDetails userDetails = this.userDetailsService.loadUserByUsername(userName);
@@ -59,8 +76,6 @@ public class JwtAuthFilter extends OncePerRequestFilter{
 					SecurityContextHolder.getContext().setAuthentication(authToken);
 				}
 				
-				
-				
 			}
 		}
 		
@@ -68,8 +83,12 @@ public class JwtAuthFilter extends OncePerRequestFilter{
 		if(invalidAuthHeader) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 	        response.setContentType("application/json");
-	        response.getWriter().write("{\"message\": \"Invalid or missing Authorization header\", \"status\": \"400\"}");
+	        response.getWriter().write("{\"message\": \"Invalid or missing Authorization header\", \"status\": 400}");
 	       
+		}else if(invalidJwt){
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		    response.setContentType("application/json");
+		    response.getWriter().write("{\"message\": \"Invalid JWT token\", \"status\": 401}");
 		}else {
 			filterChain.doFilter(request, response);
 		}

@@ -22,6 +22,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
     
+    @ExceptionHandler(ImageNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<Map<String, Object>> handleImageNotFoundException(ImageNotFoundException exception) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", HttpStatus.NOT_FOUND.value());
+        response.put("message", exception.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+    
     
     
     @ExceptionHandler(UserNotFoundException.class)
@@ -33,5 +43,17 @@ public class GlobalExceptionHandler {
         response.put("message", e.getMessage());
 
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+    
+    
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException e) {
+    	
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("message", e.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }
