@@ -2,7 +2,6 @@ package com.castillojuan.synchrony.service;
 
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,7 @@ import com.castillojuan.synchrony.dto.UserDTO;
 import com.castillojuan.synchrony.entity.Image;
 import com.castillojuan.synchrony.entity.User;
 import com.castillojuan.synchrony.enums.Role;
-import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
+import com.castillojuan.synchrony.exception.UserNotFoundException;
 import com.castillojuan.synchrony.repository.ImageRepository;
 import com.castillojuan.synchrony.repository.UserRepository;
 import com.castillojuan.synchrony.security.AuthenticationResponse;
@@ -75,33 +74,27 @@ public class UserService {
      * @param userId
      * @return
      */
-    public UserDTO getUserWithImages(String authHeader, Long userId) {
-    	//check authorization 
-    	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
-    	
-    	if(token == null || authHeader.isBlank()) {
-    		throw new UnauthorizedAccessException("Unauthorized access");
-    	}
-    	
+	public UserDTO getUserWithImages(String authHeader, Long userId) {
+		// check authorization
+		String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
 
-		//check if user exists and get user info 
-		String userName =  jwtService.extractUsername(token);
-		Optional<User> optionalUser = Optional.ofNullable(userRepository.findByUsername(userName).orElseThrow(() -> new NoSuchElementException("User not found")));
-		
-		if(optionalUser.isPresent()) {
-			User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("User not found"));
-	        List<Image> images = imageRepository.findByUserId(userId);
-	        user.setImages(images);
-	        
-	        UserDTO uerDto = Util.toUserResponseDTO(user);
-	        return uerDto;
-		}else {
-			throw new NoSuchElementException("User not found");
+		// check if user exists and get user info
+		String userName = jwtService.extractUsername(token);
+		Optional<User> optionalUser = Optional.ofNullable(
+				userRepository.findByUsername(userName).orElseThrow(() -> new UserNotFoundException("User not found")));
+
+		if (optionalUser.isPresent()) {
+			User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
+			List<Image> images = imageRepository.findByUserId(userId);
+			user.setImages(images);
+
+			UserDTO uerDto = Util.toUserResponseDTO(user);
+			return uerDto;
+		} else {
+			throw new UserNotFoundException("User not found");
 		}
-		
-	
-    	
-    }
+
+	}
     
     
 }
