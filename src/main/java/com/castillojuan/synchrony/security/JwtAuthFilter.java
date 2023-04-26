@@ -51,8 +51,6 @@ public class JwtAuthFilter extends OncePerRequestFilter{
 		}else if(authHeader == null || !authHeader.startsWith("Bearer ")) {	
 			
 			invalidAuthHeader = true;
-//			filterChain.doFilter(request, response);
-//			return;
 			
 		}else {
 			

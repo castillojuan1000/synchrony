@@ -1,5 +1,6 @@
 package com.castillojuan.synchrony.controller;
 
+import java.io.IOException;
 import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,25 +36,15 @@ public class ImgurController {
      * @param authHeader
      * @param image
      * @return
+     * @throws IOException 
      */
     @PostMapping("/image")
-    public ResponseEntity<?> uploadImage(@RequestHeader("Authorization") String authHeader,@RequestParam("image") MultipartFile image) {
-    	
-    	
-    	try {
+    public ResponseEntity<?> uploadImage(@RequestHeader("Authorization") String authHeader,@RequestParam("image") MultipartFile image) throws IOException {
+
             byte[] imageData = image.getBytes();
             Image response = imgurService.uploadImage(imageData,authHeader);
             
-            return ResponseEntity.ok(response);
-        }catch(UnauthorizedAccessException e) {
-        	
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
-
-        } catch (Exception e) {
-        	
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    	
+            return ResponseEntity.ok(response);	
     }
     
     

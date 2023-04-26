@@ -17,6 +17,7 @@ import com.castillojuan.synchrony.repository.UserRepository;
 import com.castillojuan.synchrony.security.ImgurConfiguration;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mysql.cj.protocol.a.TextRowFactory;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -52,12 +53,12 @@ public class ImgurService implements Serializable{
     */
     public Image uploadImage(byte[] imageData, String authHeader) throws IOException {
     	
+    	if (imageData == null || imageData.length == 0) {
+            throw new IllegalArgumentException("Image data is not present");
+        }
+    	
     	//check authorization 
     	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
-    	
-    	if(token == null || authHeader.isBlank()) {
-    		throw new UnauthorizedAccessException("Unauthorized access.");
-    	}
     	
 
 		String userName =  jwtService.extractUsername(token);
