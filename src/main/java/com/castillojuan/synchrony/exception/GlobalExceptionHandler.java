@@ -35,14 +35,14 @@ public class GlobalExceptionHandler {
     
     
     @ExceptionHandler(UserNotFoundException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<Map<String, Object>> handleUserNotFoundException(UserNotFoundException e) {
     	
         Map<String, Object> response = new HashMap<>();
-        response.put("status", HttpStatus.UNAUTHORIZED.value());
+        response.put("status", HttpStatus.NOT_FOUND.value());
         response.put("message", e.getMessage());
 
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
     
     
