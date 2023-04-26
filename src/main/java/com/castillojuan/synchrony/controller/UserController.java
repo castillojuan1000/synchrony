@@ -33,7 +33,7 @@ public class UserController {
     @GetMapping("/{userId}")
 	public ResponseEntity<?> getUserWithImages(@RequestHeader("Authorization") String authHeader,
 			@PathVariable Long userId) {
-
+    	//test - delete later
 		UserDTO user = userService.getUserWithImages(authHeader, userId);
 
 		return ResponseEntity.ok(user);
