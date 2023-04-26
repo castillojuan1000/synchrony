@@ -1,7 +1,8 @@
 package com.castillojuan.synchrony.controller;
 
 import java.io.IOException;
-import java.util.NoSuchElementException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,9 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.castillojuan.synchrony.entity.Image;
-import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
 import com.castillojuan.synchrony.service.ImgurService;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
@@ -54,31 +53,17 @@ public class ImgurController {
      * @param authHeader
      * @param imageHash
      * @return
+     * @throws IOException 
      */
     @DeleteMapping("/image/{imageHash}")
-    public ResponseEntity<?> deleteImage(@RequestHeader("Authorization") String authHeader, @PathVariable String imageHash) {
-    	
-    	try {
-    		
-            imgurService.deleteImage(imageHash, authHeader);
-            JsonNode response = objectMapper.createObjectNode().put("message", "Image with imageHash " + imageHash + " has been deleted.");
-            
-            return ResponseEntity.ok(response);
-            
-        }catch(UnauthorizedAccessException e) {
-        	
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access.");
+    public ResponseEntity<?> deleteImage(@RequestHeader("Authorization") String authHeader, @PathVariable String imageHash) throws IOException {
 
-        }catch(NoSuchElementException e) {
-        	
-        	return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User not found.");
-        }catch(IllegalStateException e) {
-        	
-        	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Image not found");
-        } catch (Exception e) {
-        	
-        	return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+		imgurService.deleteImage(imageHash, authHeader);
+		Map<String, Object> response = new HashMap<>();
+        response.put("status", HttpStatus.OK.value());
+        response.put("message", "Image with imageHash " + imageHash + " has been deleted.");
 
-    }
+		return ResponseEntity.ok(response);
+
+	}
 }

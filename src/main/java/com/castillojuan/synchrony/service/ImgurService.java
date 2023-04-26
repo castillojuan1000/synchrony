@@ -10,14 +10,13 @@ import org.springframework.stereotype.Service;
 
 import com.castillojuan.synchrony.entity.Image;
 import com.castillojuan.synchrony.entity.User;
-import com.castillojuan.synchrony.exception.UnauthorizedAccessException;
+import com.castillojuan.synchrony.exception.ImageNotFoundException;
 import com.castillojuan.synchrony.exception.UserNotFoundException;
 import com.castillojuan.synchrony.repository.ImageRepository;
 import com.castillojuan.synchrony.repository.UserRepository;
 import com.castillojuan.synchrony.security.ImgurConfiguration;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mysql.cj.protocol.a.TextRowFactory;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -107,14 +106,7 @@ public class ImgurService implements Serializable{
      * @throws IOException
      */
     public void deleteImage(String imageHash,String authHeader) throws IOException {
-    	//Authorization
     	String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
-
-
-    	if(token == null || authHeader.isBlank()) {
-    		throw new UnauthorizedAccessException("Unauthorized access");
-    	}
-    	
 
 		
 		String userName =  jwtService.extractUsername(token);
@@ -139,12 +131,10 @@ public class ImgurService implements Serializable{
 	            if(image != null) {
 	            	 imageRepository.delete(image);
 	            }else {
-	            	throw new IllegalStateException("Image not found with imageHash: " + imageHash);
+	            	throw new ImageNotFoundException("Image not found with imageHash: " + imageHash);
 	            }
 	        }
 	        
-		}else {
-			throw new NoSuchElementException("User not found");
 		}
 	
     	
