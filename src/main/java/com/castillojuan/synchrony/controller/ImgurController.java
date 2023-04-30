@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.castillojuan.synchrony.entity.Image;
+import com.castillojuan.synchrony.exception.MissingImageHashException;
 import com.castillojuan.synchrony.service.ImgurService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -57,7 +58,7 @@ public class ImgurController {
      */
     @DeleteMapping("/image/{imageHash}")
     public ResponseEntity<?> deleteImage(@RequestHeader("Authorization") String authHeader, @PathVariable String imageHash) throws IOException {
-
+    	
 		imgurService.deleteImage(imageHash, authHeader);
 		Map<String, Object> response = new HashMap<>();
         response.put("status", HttpStatus.OK.value());
@@ -66,4 +67,9 @@ public class ImgurController {
 		return ResponseEntity.ok(response);
 
 	}
+    
+    @DeleteMapping({"/image", "/image/"})
+    public ResponseEntity<?> handleMissingImageHash() {
+    	throw new MissingImageHashException("An image id is required. Please include an image id in the request path.");
+    }
 }
