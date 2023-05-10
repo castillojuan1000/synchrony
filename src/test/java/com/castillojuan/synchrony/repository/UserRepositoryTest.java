@@ -5,6 +5,7 @@ package com.castillojuan.synchrony.repository;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,11 @@ public class UserRepositoryTest {
     
     @Autowired
     private UserRepository userRepository;
+    
+    @AfterEach
+    void tearDown() {
+    	userRepository.deleteAll();
+    }
     
     @Test
     public void testFindUserByEmail() {
