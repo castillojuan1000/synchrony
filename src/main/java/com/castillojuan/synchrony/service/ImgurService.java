@@ -5,10 +5,14 @@ import java.io.Serializable;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import javax.management.loading.PrivateClassLoader;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.castillojuan.synchrony.entity.Image;
+import com.castillojuan.synchrony.entity.KafkaImageData;
 import com.castillojuan.synchrony.entity.User;
 import com.castillojuan.synchrony.exception.ImageNotFoundException;
 import com.castillojuan.synchrony.exception.UserNotFoundException;
@@ -37,6 +41,8 @@ public class ImgurService implements Serializable{
     private UserRepository userRepository;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private KafkaTemplate<String, KafkaImageData> kafkaTemplate;
     
     
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -63,6 +69,8 @@ public class ImgurService implements Serializable{
 		String userName =  jwtService.extractUsername(token);
 		User user = userRepository.findByUsername(userName).orElseThrow(() -> new UserNotFoundException("User not found"));
 		
+ 
+		
 		//forming and executing external endpoint (Imgur)
         OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = new MultipartBody.Builder()
@@ -83,8 +91,18 @@ public class ImgurService implements Serializable{
             JsonNode jsonResponse = objectMapper.readTree(responseBody);
             String imageHash = jsonResponse.get("data").get("id").asText();
             String imageLink = jsonResponse.get("data").get("link").asText();   
+            
+            // create ImageData object
+            KafkaImageData kafkaImageData = new KafkaImageData();
+            kafkaImageData.setUserName(userName);
+            kafkaImageData.setImageLink(imageLink);
+            
+
+            // send ImageData to kafka topic
+            kafkaTemplate.send("synchrony_topic", kafkaImageData);
+	   	 	
   
-            //post image to H2 	
+            //post image to MySQL 	
 	   	 	Image image = new Image(imageHash, imageLink, user);
 	        return imageRepository.save(image);
 	                    
