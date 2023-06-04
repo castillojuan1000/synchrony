@@ -9,5 +9,6 @@ public class SynchronyApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SynchronyApplication.class, args);
 	}
+	
 
 }
